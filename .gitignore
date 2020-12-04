@@ -1,0 +1,5 @@
+*.py[cod]
+.mypy_cache
+.venv
+.pytest_cache
+.coverage
