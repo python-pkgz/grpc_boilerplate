@@ -49,17 +49,23 @@ def attach_middlewares(
     api_token_header: str = API_TOKEN_HEADER,
     peer_whitelist: List[Union[IPv4Network, IPv6Network]] = [],
 ):
+    if api_token and api_token_header:
+        logger.info("api token middleware attached")
+    else:
+        logger.info("api token middleware NOT attached")
+
+    if peer_whitelist:
+        logger.info(f"peer whitelist middleware attached with networks: {peer_whitelist}")
+    else:
+        logger.info("peer whitelist middleware NOT attached")
+
     async def recv_request(event: RecvRequest):
         # Middlewares called in reversed order
         if api_token and api_token_header:
-            logger.info("api token middleware attached")
             attach_token_auth(event, api_header=api_token_header, api_token=api_token)
-        else:
-            logger.info("api token middleware NOT attached")
+
         if peer_whitelist:
             logger.info(f"peer whitelist middleware attached with networks: {peer_whitelist}")
             attach_check_peer_method(event, address_whitelist=peer_whitelist)
-        else:
-            logger.info("peer whitelist middleware NOT attached")
 
     listen(server, RecvRequest, recv_request)
