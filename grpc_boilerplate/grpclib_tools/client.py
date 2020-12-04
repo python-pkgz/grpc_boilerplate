@@ -1,4 +1,4 @@
-from typing import Type, Optional, Protocol
+from typing import Type, Optional, TypeVar
 
 import urllib.parse
 
@@ -9,9 +9,7 @@ from grpc_boilerplate.constants import API_TOKEN_HEADER, TLS_CLIENT_CRT, TLS_CLI
 from grpc_boilerplate.grpclib_tools.tls import create_secure_context
 
 
-class ApiStub(Protocol):
-    def __init__(self, channel: Channel):
-        pass
+ApiStub = TypeVar('ApiStub')
 
 
 def api_stub(
@@ -48,4 +46,4 @@ def api_stub(
             event.metadata[API_TOKEN_HEADER] = token
         listen(channel, SendRequest, on_send_request)
 
-    return stub(channel)
+    return stub(channel)  # type: ignore
