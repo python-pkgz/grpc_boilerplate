@@ -19,6 +19,8 @@ def api_stub(
     tls_client_cert=TLS_CLIENT_CRT,
     tls_client_key=TLS_CLIENT_KEY,
     tls_trusted_certs=TLS_TRUSTED_CERTS,
+
+    api_token_header=API_TOKEN_HEADER,
 ) -> ApiStub:
     parsed = urllib.parse.urlparse(connection_string, allow_fragments=False)
     host: str = parsed.hostname or 'localhost'
@@ -43,7 +45,7 @@ def api_stub(
     if token is not None:
         async def on_send_request(event: SendRequest) -> None:
             assert token is not None
-            event.metadata[API_TOKEN_HEADER] = token
+            event.metadata[api_token_header] = token
         listen(channel, SendRequest, on_send_request)
 
     return stub(channel)  # type: ignore

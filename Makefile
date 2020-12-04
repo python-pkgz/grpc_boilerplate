@@ -1,3 +1,7 @@
+.PHONY: clean
+clean:
+	rm -rf .mypy_cache .pytest_cache dist grpc_boilerplate.egg-info .coverage
+
 .PHONY: qa
 qa:
 	pipenv run flake8 grpc_boilerplate
