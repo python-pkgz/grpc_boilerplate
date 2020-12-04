@@ -7,7 +7,7 @@ setup(
     name='grpc_boilerplate',
     version=VERSION,
     include_package_data=True,
-    packages=find_packages(where='grpc_boilerplate'),
+    packages=find_packages(exclude='tests'),
     url='https://github.com/a1fred/grpc_boilerplate',
     license='MIT',
     author='a1fred',

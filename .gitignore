@@ -3,3 +3,6 @@
 .venv
 .pytest_cache
 .coverage
+*.egg-info
+dist
+.DS_Store
