@@ -1,4 +1,4 @@
-API_TOKEN_HEADER = 'API_TOKEN'
+API_TOKEN_HEADER = 'api_token'
 
 TLS_CLIENT_CRT = "client.crt"
 TLS_CLIENT_KEY = "client.key"
