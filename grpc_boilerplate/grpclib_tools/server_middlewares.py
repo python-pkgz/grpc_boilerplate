@@ -65,7 +65,6 @@ def attach_middlewares(
             attach_token_auth(event, api_header=api_token_header, api_token=api_token)
 
         if peer_whitelist:
-            logger.info(f"peer whitelist middleware attached with networks: {peer_whitelist}")
             attach_check_peer_method(event, address_whitelist=peer_whitelist)
 
     listen(server, RecvRequest, recv_request)
