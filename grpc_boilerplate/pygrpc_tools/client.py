@@ -1,10 +1,10 @@
-from typing import Type, Optional, TypeVar
+from typing import Type, TypeVar
 import collections
-import urllib.parse
 
 import grpc  # type: ignore
 
-from grpc_boilerplate.constants import API_TOKEN_HEADER, TLS_CLIENT_CRT, TLS_CLIENT_KEY, TLS_TRUSTED_CERTS
+from grpc_boilerplate.constants import API_TOKEN_HEADER
+from grpc_boilerplate.connectionstring import parse_grpc_connectionstring
 
 
 ApiStub = TypeVar('ApiStub')
@@ -17,7 +17,7 @@ class _ClientCallDetails(
     pass
 
 
-def _token_auth(header, token) -> grpc.UnaryUnaryClientInterceptor:
+def _token_auth(header: str, token: str) -> grpc.UnaryUnaryClientInterceptor:
     class AuthInterceptor(grpc.UnaryUnaryClientInterceptor):
         def intercept_unary_unary(self, continuation, client_call_details, request):
             metadata = []
@@ -31,33 +31,24 @@ def _token_auth(header, token) -> grpc.UnaryUnaryClientInterceptor:
     return AuthInterceptor()
 
 
+# Parse grpc connectionstring `h2c|h2cs://[<token>@]host:port[?ServerCrt=<path to server cert>]`
+# Attempt to create generic connectionstring format for grpc connections
 def api_stub(
     connection_string: str,
     stub: Type[ApiStub],
-
-    tls_client_cert=TLS_CLIENT_CRT,
-    tls_client_key=TLS_CLIENT_KEY,
-    tls_trusted_certs=TLS_TRUSTED_CERTS,
-
     api_token_header=API_TOKEN_HEADER,
 ) -> ApiStub:
-    parsed = urllib.parse.urlparse(connection_string, allow_fragments=False)
-    host: str = parsed.hostname or 'localhost'
-    port: int = parsed.port or 50000
-    token: Optional[str] = parsed.username or None
+    parsed = parse_grpc_connectionstring(connection_string=connection_string)
 
-    if parsed.scheme == 'h2c':
-        c = grpc.insecure_channel(f"{host}:{port}")
-    elif parsed.scheme == 'h2cs':
-        c = grpc.secure_channel(f"{host}:{port}", grpc.ssl_channel_credentials(
-            root_certificates=open(tls_trusted_certs, 'rb').read(),
-            private_key=open(tls_client_key, 'rb').read(),
-            certificate_chain=open(tls_client_cert, 'rb').read()
-        ))
+    if parsed.is_secure():
+        assert parsed.server_crt is not None
+        with open(parsed.server_crt, 'rb') as f:
+            creds = grpc.ssl_channel_credentials(f.read())
+        c = grpc.secure_channel(f"{parsed.host}:{parsed.port}", creds)
     else:
-        raise ValueError(
-            f"Unknown scheme: '{parsed.scheme}' for '{connection_string}'"
-        )
+        c = grpc.insecure_channel(f"{parsed.host}:{parsed.port}")
 
-    channel = grpc.intercept_channel(c, _token_auth(api_token_header, token))
+    if parsed.api_token:
+        assert parsed.api_token is not None
+        channel = grpc.intercept_channel(c, _token_auth(api_token_header, parsed.api_token))
     return stub(channel)  # type: ignore

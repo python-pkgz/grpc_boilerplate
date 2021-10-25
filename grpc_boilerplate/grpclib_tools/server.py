@@ -8,7 +8,7 @@ from grpclib.server import Server as GRPCLibServer
 from grpclib.utils import graceful_exit
 
 from grpc_boilerplate.grpclib_tools.server_middlewares import attach_middlewares
-from grpc_boilerplate.constants import API_TOKEN_HEADER, TLS_CLIENT_CRT, TLS_CLIENT_KEY, TLS_TRUSTED_CERTS
+from grpc_boilerplate.constants import API_TOKEN_HEADER
 from grpc_boilerplate.grpclib_tools.tls import create_secure_context
 
 if TYPE_CHECKING:
@@ -46,17 +46,8 @@ class Server:
 
         self._ssl_ctx: Optional[ssl.SSLContext] = None
 
-    def create_tls_context(
-        self,
-        tls_client_cert=TLS_CLIENT_CRT,
-        tls_client_key=TLS_CLIENT_KEY,
-        tls_trusted_certs=TLS_TRUSTED_CERTS,
-    ):
-        self._ssl_ctx = create_secure_context(
-            client_cert=tls_client_cert,
-            client_key=tls_client_key,
-            trusted_certs=tls_trusted_certs,
-        )
+    def create_tls_context(self, crt: str, key: str):
+        self._ssl_ctx = create_secure_context(crt, key)
 
     async def serve(
         self,
