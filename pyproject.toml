@@ -7,7 +7,7 @@ license = "MIT"
 include = ["grpc_boilerplate"]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.7"
 
 [tool.poetry.dev-dependencies]
 mypy = "^0.910"
