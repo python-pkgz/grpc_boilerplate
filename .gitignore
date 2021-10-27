@@ -8,3 +8,6 @@ dist
 .DS_Store
 certs
 .vscode
+helloworld_pb2_grpc.py
+helloworld_pb2.py
+helloworld_grpc.py

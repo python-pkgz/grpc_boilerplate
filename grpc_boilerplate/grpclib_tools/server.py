@@ -1,5 +1,4 @@
 import logging
-import ssl
 from typing import TYPE_CHECKING, List, Any, Dict, Optional, Union
 from ipaddress import IPv4Network, IPv6Network
 
@@ -9,7 +8,6 @@ from grpclib.utils import graceful_exit
 
 from grpc_boilerplate.grpclib_tools.server_middlewares import attach_middlewares
 from grpc_boilerplate.constants import API_TOKEN_HEADER
-from grpc_boilerplate.grpclib_tools.tls import create_secure_context
 
 if TYPE_CHECKING:
     from grpclib._typing import IServable  # noqa
@@ -44,17 +42,12 @@ class Server:
             peer_whitelist=peer_whitelist
         )
 
-        self._ssl_ctx: Optional[ssl.SSLContext] = None
-
-    def create_tls_context(self, crt: str, key: str):
-        self._ssl_ctx = create_secure_context(crt, key)
-
     async def serve(
         self,
         host: str = 'localhost',
         port: int = 50000,
     ):
         with graceful_exit([self.server]):
-            await self.server.start(host, port, ssl=self._ssl_ctx)
+            await self.server.start(host, port)
             logger.debug(f'Serving on {host}:{port}')
             await self.server.wait_closed()

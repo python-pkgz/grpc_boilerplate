@@ -3,19 +3,30 @@ import urllib.parse
 
 
 class ParsedGrpcConnectionString:
-    host: str
-    port: int
-    api_token: Optional[str] = None
+    """
+    GRPC Connectionstring represenration
+    """
 
-    server_crt: Optional[str] = ""
+    host: str = "" # Server host
+    port: int = 0  # Server port
+
+    api_token: Optional[str] = None  # Server api token
+
+    server_crt: Optional[str] = None # Server certificate if connection is secure
 
     def is_secure(self) -> bool:
+        """
+        Connection is secure
+        """
         return bool(self.server_crt)
 
 
-# Parse grpc connectionstring `h2c|h2cs://[<token>@]host:port[?ServerCrt=<path to server cert>]`
-# Attempt to create generic connectionstring format for grpc connections
 def parse_grpc_connectionstring(connection_string: str) -> ParsedGrpcConnectionString:
+    """
+    Parse grpc connectionstring `h2c|h2cs://[<token>@]host:port[?ServerCrt=<path to server cert>]`
+    Attempt to create generic connectionstring format for grpc connections
+    """
+
     result = ParsedGrpcConnectionString()
 
     parsed = urllib.parse.urlparse(connection_string, allow_fragments=False)
