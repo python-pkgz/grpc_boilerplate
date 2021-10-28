@@ -11,7 +11,7 @@ ApiStub = TypeVar('ApiStub')
 
 
 class _ClientCallDetails(
-    collections.namedtuple('_ClientCallDetails', ('method', 'timeout', 'metadata', 'credentials')),
+    collections.namedtuple('_ClientCallDetails', ('method', 'timeout', 'metadata', 'credentials', 'wait_for_ready', 'compression')),
     grpc.ClientCallDetails
 ):
     pass
@@ -23,9 +23,17 @@ def _token_auth(header: str, token: str) -> grpc.UnaryUnaryClientInterceptor:
             metadata = []
             if client_call_details.metadata is not None:
                 metadata = list(client_call_details.metadata)
+
             metadata.append((header, token))
+
             client_call_details = _ClientCallDetails(
-                client_call_details.method, client_call_details.timeout, metadata, client_call_details.credentials)
+                client_call_details.method,
+                client_call_details.timeout,
+                metadata,
+                client_call_details.credentials,
+                client_call_details.wait_for_ready,
+                client_call_details.compression,
+            )
             return continuation(client_call_details, request)
 
     return AuthInterceptor()
