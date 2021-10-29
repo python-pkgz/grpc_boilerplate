@@ -1,4 +1,4 @@
-from typing import Type, TypeVar, Callable, Tuple
+from typing import Type, TypeVar, Generic
 
 import grpc  # type: ignore
 
@@ -32,27 +32,42 @@ def _token_auth(header: str, token: str) -> grpc.aio.UnaryUnaryClientInterceptor
     return AuthInterceptor()
 
 
-# Create grpc.aio client from connection_string
-# see grpc_boilerplate.connectionstring.parse_grpc_connectionstring for connectionstring format
-# Returns stub instance, close function
-def api_stub(
-    connection_string: str,
-    stub: Type[ApiStub],
-    api_token_header=API_TOKEN_HEADER,
-) -> Tuple[ApiStub, Callable[[], None]]:
-    parsed = parse_grpc_connectionstring(connection_string=connection_string)
+class api_stub(Generic[ApiStub]):
+    """
+    Create grpc.aio client from connection_string
+    see grpc_boilerplate.connectionstring.parse_grpc_connectionstring for connectionstring format
 
-    interceptors = []
-    if parsed.api_token:
-        assert parsed.api_token is not None
-        interceptors.append(_token_auth(api_token_header, parsed.api_token))
+    Usage:
+    async with api_stub("h2c://127.0.0.1:50001", helloworld_pb2_grpc.GreeterStub) as greeter:
+       resp = client.SayHello(helloworld_pb2.HelloRequest(name=kwargs['message']))
+       print(resp)
+    """
+    def __init__(
+        self,
+        connection_string: str,
+        stub: Type[ApiStub],
+        api_token_header=API_TOKEN_HEADER,
+    ) -> None:
+        parsed = parse_grpc_connectionstring(connection_string=connection_string)
+        interceptors = []
+        if parsed.api_token:
+            assert parsed.api_token is not None
+            interceptors.append(_token_auth(api_token_header, parsed.api_token))
 
-    if parsed.is_secure():
-        assert parsed.server_crt is not None
-        with open(parsed.server_crt, 'rb') as f:
-            creds = grpc.ssl_channel_credentials(f.read())
-        channel = grpc.aio.secure_channel(f"{parsed.host}:{parsed.port}", credentials=creds, interceptors=interceptors)
-    else:
-        channel = grpc.aio.insecure_channel(f"{parsed.host}:{parsed.port}", interceptors=interceptors)
+        if parsed.is_secure():
+            assert parsed.server_crt is not None
+            with open(parsed.server_crt, 'rb') as f:
+                creds = grpc.ssl_channel_credentials(f.read())
 
-    return stub(channel), lambda: channel.close()  # type: ignore
+            channel = grpc.aio.secure_channel(f"{parsed.host}:{parsed.port}", credentials=creds, interceptors=interceptors)
+        else:
+            channel = grpc.aio.insecure_channel(f"{parsed.host}:{parsed.port}", interceptors=interceptors)
+
+        self.stub: ApiStub = stub(channel)  # type: ignore
+        self.channel: grpc.aio.Channel = channel
+
+    async def __aenter__(self) -> ApiStub:
+        return self.stub
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        await self.channel.close()

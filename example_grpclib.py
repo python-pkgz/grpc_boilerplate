@@ -45,10 +45,9 @@ class Client(Command):
 
     async def handle(self, **kwargs):
         connection_string = kwargs['connection_string']
-        client, close = api_stub(connection_string, stub=helloworld_grpc.GreeterStub)
-        resp = await client.SayHello(helloworld_pb2.HelloRequest(name=kwargs['message']))
+        with api_stub(connection_string, stub=helloworld_grpc.GreeterStub) as client:
+            resp = await client.SayHello(helloworld_pb2.HelloRequest(name=kwargs['message']))
         print(resp)
-        close()
 
 
 if __name__ == "__main__":
