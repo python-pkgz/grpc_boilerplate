@@ -1,4 +1,4 @@
-from typing import Type, TypeVar, Generic
+from typing import Type, TypeVar, Generic, Sequence
 
 import grpc  # type: ignore
 
@@ -47,9 +47,11 @@ class api_stub(Generic[ApiStub]):
         connection_string: str,
         stub: Type[ApiStub],
         api_token_header=API_TOKEN_HEADER,
+        interceptors: Sequence[grpc.aio.ClientInterceptor] = (),
     ) -> None:
         parsed = parse_grpc_connectionstring(connection_string=connection_string)
-        interceptors = []
+        interceptors = list(interceptors)
+
         if parsed.api_token:
             assert parsed.api_token is not None
             interceptors.append(_token_auth(api_token_header, parsed.api_token))
