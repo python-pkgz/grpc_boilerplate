@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "grpc_boilerplate"
-version = "0.10"
+version = "0.11"
 description = ""
 authors = ["Dmirty Simonov <demalf@gmail.com>"]
 license = "MIT"
