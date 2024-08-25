@@ -7,19 +7,55 @@ license = "MIT"
 include = ["grpc_boilerplate"]
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.8"
 
 [tool.poetry.dev-dependencies]
-mypy = "^0.910"
-flake8 = "^4.0.1"
+mypy = "*"
 grpcio = "^1.41.0"
 grpclib = "^0.4.2"
 management-commands = "^0.5"
-pytest = "^6.2.5"
-pytest-cov = "^3.0.0"
-grpcio-tools = "^1.41.1"
-types-protobuf = "^3.18.0"
+pytest = "*"
+pytest-cov = "*"
+grpcio-tools = "*"
+types-protobuf = "*"
+mypy-protobuf = "*"
+
+[tool.poetry.group.dev.dependencies]
+mypy-protobuf = "^3.6.0"
+ruff = "^0.6.2"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+
+[tool.ruff]
+exclude = [".git", ".venv"]
+line-length = 140
+indent-width = 4
+
+[tool.mypy]
+python_version = "3.9"
+check_untyped_defs = true
+disallow_untyped_defs = false
+disallow_incomplete_defs = true
+warn_redundant_casts = true
+allow_untyped_globals = false
+warn_unused_configs = true
+strict_optional = true
+strict_equality = true
+
+[tool.mypy-.venv]
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = "helloworld_pb2_grpc.*"
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = "helloworld_pb2.*"
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = "helloworld_grpc.*"
+ignore_errors = true

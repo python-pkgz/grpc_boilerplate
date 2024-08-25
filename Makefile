@@ -6,9 +6,9 @@ clean:
 
 .PHONY: examples
 examples: certs
-	poetry run python -m grpc_tools.protoc -I. --python_out=. ./helloworld.proto          # Protobuf messages (helloworld_pb2.py)
-	poetry run python -m grpc_tools.protoc -I. --grpc_python_out=. ./helloworld.proto     # Grpcio (helloworld_pb2_grpc.py)
-	poetry run python -m grpc_tools.protoc -I. --grpclib_python_out=. ./helloworld.proto  # Grpclib (helloworld_grpc.py)
+	poetry run python -m grpc_tools.protoc -I. --mypy_out=. --python_out=. ./helloworld.proto          # Protobuf messages (helloworld_pb2.py)
+	poetry run python -m grpc_tools.protoc -I. --mypy_out=. --grpc_python_out=. ./helloworld.proto     # Grpcio (helloworld_pb2_grpc.py)
+	poetry run python -m grpc_tools.protoc -I. --mypy_out=. --grpclib_python_out=. ./helloworld.proto  # Grpclib (helloworld_grpc.py)
 
 
 certs:
@@ -19,8 +19,9 @@ certs:
 
 .PHONY: qa
 qa:
-	poetry run flake8 grpc_boilerplate
-	poetry run mypy --warn-unused-ignores grpc_boilerplate
+	poetry run ruff check .
+	poetry run ruff format --check
+	poetry run mypy --warn-unused-ignores .
 
 
 .PHONY: test

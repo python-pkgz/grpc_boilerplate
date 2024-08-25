@@ -13,14 +13,11 @@ from grpc_boilerplate.constants import API_TOKEN_HEADER
 logger = logging.getLogger(__name__)
 
 
-def attach_check_peer_method(
-    event,
-    address_whitelist: List[Union[IPv4Network, IPv6Network]]
-):
+def attach_check_peer_method(event: RecvRequest, address_whitelist: List[Union[IPv4Network, IPv6Network]]) -> None:
     method_func = event.method_func
 
     async def wrapper(stream):
-        address_str = stream._stream._transport.get_extra_info('peername')[0]
+        address_str = stream._stream._transport.get_extra_info("peername")[0]
         address = ip_address(address_str)
 
         for network in address_whitelist:
@@ -32,11 +29,11 @@ def attach_check_peer_method(
     event.method_func = wrapper
 
 
-def attach_token_auth(event, api_header: str, api_token: str):
+def attach_token_auth(event: RecvRequest, api_header: str, api_token: str) -> None:
     method_func = event.method_func
 
     async def wrapper(stream):
-        if event.metadata.get(api_header, "") != api_token and stream._method_name != '/grpc.health.v1.Health/Check':
+        if event.metadata.get(api_header, "") != api_token and stream._method_name != "/grpc.health.v1.Health/Check":
             raise GRPCError(Status.UNAUTHENTICATED)
         return await method_func(stream)
 
@@ -48,7 +45,7 @@ def attach_middlewares(
     api_token: str = "",
     api_token_header: str = API_TOKEN_HEADER,
     peer_whitelist: List[Union[IPv4Network, IPv6Network]] = [],
-):
+) -> None:
     if api_token and api_token_header:
         logger.info("api token middleware attached")
     else:
@@ -59,7 +56,7 @@ def attach_middlewares(
     else:
         logger.info("peer whitelist middleware NOT attached")
 
-    async def recv_request(event: RecvRequest):
+    async def recv_request(event: RecvRequest) -> None:
         # Middlewares called in reversed order
         if api_token and api_token_header:
             attach_token_auth(event, api_header=api_token_header, api_token=api_token)

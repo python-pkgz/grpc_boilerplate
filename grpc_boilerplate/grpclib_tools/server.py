@@ -19,15 +19,12 @@ logger = logging.getLogger(__name__)
 class Server:
     def __init__(
         self,
-        handlers: List['IServable'],
-
+        handlers: List["IServable"],
         # grpclib.server.Server kwargs
         server_kwargs: Optional[Dict[str, Any]] = None,
-
         # Token auth middleware
         api_token: str = "",
         api_token_header: str = API_TOKEN_HEADER,
-
         # Peer whitelist middleware
         peer_whitelist: List[Union[IPv4Network, IPv6Network]] = [],
     ):
@@ -38,16 +35,17 @@ class Server:
         self.server: GRPCLibServer = GRPCLibServer(handlers=handlers, **server_kwargs)
         attach_middlewares(
             server=self.server,
-            api_token=api_token, api_token_header=api_token_header,
-            peer_whitelist=peer_whitelist
+            api_token=api_token,
+            api_token_header=api_token_header,
+            peer_whitelist=peer_whitelist,
         )
 
     async def serve(
         self,
-        host: str = 'localhost',
+        host: str = "localhost",
         port: int = 50000,
-    ):
+    ) -> None:
         with graceful_exit([self.server]):
             await self.server.start(host, port)
-            logger.debug(f'Serving on {host}:{port}')
+            logger.debug(f"Serving on {host}:{port}")
             await self.server.wait_closed()

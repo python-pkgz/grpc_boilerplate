@@ -7,12 +7,12 @@ class ParsedGrpcConnectionString:
     GRPC Connectionstring represenration
     """
 
-    host: str = "" # Server host
+    host: str = ""  # Server host
     port: int = 0  # Server port
 
     api_token: Optional[str] = None  # Server api token
 
-    server_crt: Optional[str] = None # Server certificate if connection is secure
+    server_crt: Optional[str] = None  # Server certificate if connection is secure
 
     def is_secure(self) -> bool:
         """
@@ -23,7 +23,7 @@ class ParsedGrpcConnectionString:
 
 def parse_grpc_connectionstring(connection_string: str) -> ParsedGrpcConnectionString:
     """
-    Parse grpc connectionstring `h2c|h2cs://[<token>@]host:port[?ServerCrt=<path to server cert>]`
+    Parse grpc connectionstring `h2c|h2://[<token>@]host:port[?ServerCrt=<path to server cert>]`
     Attempt to create generic connectionstring format for grpc connections
     """
 
@@ -43,7 +43,7 @@ def parse_grpc_connectionstring(connection_string: str) -> ParsedGrpcConnectionS
     result.port = port
 
     qs = urllib.parse.parse_qs(parsed.query)
-    server_crt_values = qs.get('ServerCrt', [])
+    server_crt_values = qs.get("ServerCrt", [])
     if len(server_crt_values) == 0:
         server_crt = None
     elif len(server_crt_values) == 1:
@@ -51,11 +51,11 @@ def parse_grpc_connectionstring(connection_string: str) -> ParsedGrpcConnectionS
     else:
         raise ValueError("Multiple ServerCrt is not allowed")
 
-    if parsed.scheme == 'h2c':
+    if parsed.scheme == "h2c":
         if server_crt:
             raise ValueError("Insecure connection must not contain ServerCrt")
         result.server_crt = None
-    elif parsed.scheme == 'h2cs':
+    elif parsed.scheme == "h2":
         if not server_crt:
             raise ValueError("Secure connection must contain ServerCrt")
         result.server_crt = server_crt

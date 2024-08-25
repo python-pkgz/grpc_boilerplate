@@ -1,4 +1,4 @@
-from typing import Type, TypeVar, Generic
+import typing
 import collections
 
 import grpc  # type: ignore
@@ -7,12 +7,22 @@ from grpc_boilerplate.constants import API_TOKEN_HEADER
 from grpc_boilerplate.connectionstring import parse_grpc_connectionstring
 
 
-ApiStub = TypeVar('ApiStub')
+ApiStub = typing.TypeVar("ApiStub")
 
 
 class _ClientCallDetails(
-    collections.namedtuple('_ClientCallDetails', ('method', 'timeout', 'metadata', 'credentials', 'wait_for_ready', 'compression')),
-    grpc.ClientCallDetails
+    collections.namedtuple(
+        "_ClientCallDetails",
+        (
+            "method",
+            "timeout",
+            "metadata",
+            "credentials",
+            "wait_for_ready",
+            "compression",
+        ),
+    ),
+    grpc.ClientCallDetails,
 ):
     pass
 
@@ -39,7 +49,7 @@ def _token_auth(header: str, token: str) -> grpc.UnaryUnaryClientInterceptor:
     return AuthInterceptor()
 
 
-class api_stub(Generic[ApiStub]):
+class api_stub(typing.Generic[ApiStub]):
     """
     Create grpc client from connection_string
     see grpc_boilerplate.connectionstring.parse_grpc_connectionstring for connectionstring format
@@ -49,21 +59,23 @@ class api_stub(Generic[ApiStub]):
        resp = client.SayHello(HelloRequest(name=kwargs['message']))
        print(resp)
     """
+
     def __init__(
         self,
         connection_string: str,
-        stub: Type[ApiStub],
-        api_token_header=API_TOKEN_HEADER,
+        stub: typing.Type[ApiStub],
+        api_token_header: str = API_TOKEN_HEADER,
+        channel_options: typing.Optional[typing.Sequence[typing.Tuple[str, typing.Any]]] = None,
     ) -> None:
         parsed = parse_grpc_connectionstring(connection_string=connection_string)
 
         if parsed.is_secure():
             assert parsed.server_crt is not None
-            with open(parsed.server_crt, 'rb') as f:
+            with open(parsed.server_crt, "rb") as f:
                 creds = grpc.ssl_channel_credentials(f.read())
-            channel = grpc.secure_channel(f"{parsed.host}:{parsed.port}", creds)
+            channel = grpc.secure_channel(f"{parsed.host}:{parsed.port}", creds, options=channel_options)
         else:
-            channel = grpc.insecure_channel(f"{parsed.host}:{parsed.port}")
+            channel = grpc.insecure_channel(f"{parsed.host}:{parsed.port}", options=channel_options)
 
         if parsed.api_token:
             assert parsed.api_token is not None

@@ -6,7 +6,7 @@ from grpclib.events import SendRequest, listen
 from grpc_boilerplate.constants import API_TOKEN_HEADER
 from grpc_boilerplate.connectionstring import parse_grpc_connectionstring
 
-ApiStub = TypeVar('ApiStub')
+ApiStub = TypeVar("ApiStub")
 
 
 class api_stub(Generic[ApiStub]):
@@ -19,11 +19,12 @@ class api_stub(Generic[ApiStub]):
        resp = await client.SayHello(HelloRequest(name=kwargs['message']))
        print(resp)
     """
+
     def __init__(
         self,
         connection_string: str,
         stub: Type[ApiStub],
-        api_token_header=API_TOKEN_HEADER,
+        api_token_header: str = API_TOKEN_HEADER,
     ) -> None:
         parsed = parse_grpc_connectionstring(connection_string=connection_string)
 
@@ -33,9 +34,11 @@ class api_stub(Generic[ApiStub]):
         channel = Channel(parsed.host, parsed.port)
 
         if parsed.api_token:
+
             async def on_send_request(event: SendRequest) -> None:
                 assert parsed.api_token is not None
                 event.metadata[api_token_header] = parsed.api_token
+
             listen(channel, SendRequest, on_send_request)
 
         self.stub: ApiStub = stub(channel)  # type: ignore
