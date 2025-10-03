@@ -7,8 +7,7 @@ class ParsedGrpcConnectionString:
     GRPC Connectionstring represenration
     """
 
-    host: str = ""  # Server host
-    port: int = 0  # Server port
+    target: str = ""  # Server target
 
     api_token: Optional[str] = None  # Server api token
 
@@ -23,24 +22,21 @@ class ParsedGrpcConnectionString:
 
 def parse_grpc_connectionstring(connection_string: str) -> ParsedGrpcConnectionString:
     """
-    Parse grpc connectionstring `h2c|h2://[<token>@]host:port[?ServerCrt=<path to server cert>]`
+    Parse grpc connectionstring `h2c|h2://[<token>@]host[:port][?ServerCrt=<path to server cert>]`
     Attempt to create generic connectionstring format for grpc connections
     """
 
     result = ParsedGrpcConnectionString()
 
     parsed = urllib.parse.urlparse(connection_string, allow_fragments=False)
-    host: Optional[str] = parsed.hostname
-    port: Optional[int] = parsed.port
     result.api_token = parsed.username or None
 
-    if not host:
-        raise ValueError("host must be specified")
-    result.host = host
+    result.target = str(parsed.netloc)
+    if "@" in result.target:
+        result.target = result.target.split("@", maxsplit=1)[1]
 
-    if not port:
-        raise ValueError("port must be specified")
-    result.port = port
+    if not result.target:
+        raise ValueError("host must be specified")
 
     qs = urllib.parse.parse_qs(parsed.query)
     server_crt_values = qs.get("ServerCrt", [])

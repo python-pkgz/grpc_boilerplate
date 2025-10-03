@@ -73,9 +73,9 @@ class api_stub(typing.Generic[ApiStub]):
             assert parsed.server_crt is not None
             with open(parsed.server_crt, "rb") as f:
                 creds = grpc.ssl_channel_credentials(f.read())
-            channel = grpc.secure_channel(f"{parsed.host}:{parsed.port}", creds, options=channel_options)
+            channel = grpc.secure_channel(f"{parsed.target}", creds, options=channel_options)
         else:
-            channel = grpc.insecure_channel(f"{parsed.host}:{parsed.port}", options=channel_options)
+            channel = grpc.insecure_channel(f"{parsed.target}", options=channel_options)
 
         if parsed.api_token:
             assert parsed.api_token is not None

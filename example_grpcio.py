@@ -1,8 +1,8 @@
 from argparse import ArgumentParser
 from management_commands import Command, main
 
-import helloworld_pb2_grpc
-import helloworld_pb2
+from tests.proto import helloworld_pb2_grpc
+from tests.proto import helloworld_pb2
 from grpc_boilerplate.grpcio_tools.client import api_stub
 import grpc  # type: ignore
 from concurrent import futures

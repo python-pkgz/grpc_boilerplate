@@ -7,12 +7,11 @@ license = "MIT"
 include = ["grpc_boilerplate"]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.9"
 
 [tool.poetry.dev-dependencies]
 mypy = "*"
 grpcio = "^1.41.0"
-grpclib = "^0.4.2"
 management-commands = "^0.5"
 pytest = "*"
 pytest-cov = "*"
@@ -23,6 +22,7 @@ mypy-protobuf = "*"
 [tool.poetry.group.dev.dependencies]
 mypy-protobuf = "^3.6.0"
 ruff = "^0.6.2"
+pytest-asyncio = "^1.2.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
@@ -49,13 +49,9 @@ strict_equality = true
 ignore_errors = true
 
 [[tool.mypy.overrides]]
-module = "helloworld_pb2_grpc.*"
+module = "tests.proto.helloworld_pb2_grpc.*"
 ignore_errors = true
 
 [[tool.mypy.overrides]]
-module = "helloworld_pb2.*"
-ignore_errors = true
-
-[[tool.mypy.overrides]]
-module = "helloworld_grpc.*"
+module = "tests.proto.helloworld_pb2.*"
 ignore_errors = true

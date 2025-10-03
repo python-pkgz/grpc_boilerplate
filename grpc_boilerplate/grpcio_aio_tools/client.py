@@ -63,14 +63,14 @@ class api_stub(typing.Generic[ApiStub]):
                 creds = grpc.ssl_channel_credentials(f.read())
 
             channel = grpc.aio.secure_channel(
-                f"{parsed.host}:{parsed.port}",
+                f"{parsed.target}",
                 credentials=creds,
                 interceptors=interceptors,
                 options=channel_options,
             )
         else:
             channel = grpc.aio.insecure_channel(
-                f"{parsed.host}:{parsed.port}",
+                f"{parsed.target}",
                 interceptors=interceptors,
                 options=channel_options,
             )

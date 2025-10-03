@@ -2,14 +2,12 @@ OPENSSL=openssl
 
 .PHONY: clean
 clean:
-	rm -rf .mypy_cache .pytest_cache dist grpc_boilerplate.egg-info .coverage certs helloworld_pb2_grpc.py helloworld_pb2.py helloworld_grpc.py
+	rm -rf .mypy_cache .pytest_cache dist grpc_boilerplate.egg-info .coverage certs ./tests/proto/helloworld_pb2_grpc.py ./tests/proto/helloworld_pb2.py ./tests/proto/helloworld_grpc.py ./tests/proto/helloworld_pb2.pyi
 
-.PHONY: examples
-examples: certs
-	poetry run python -m grpc_tools.protoc -I. --mypy_out=. --python_out=. ./helloworld.proto          # Protobuf messages (helloworld_pb2.py)
-	poetry run python -m grpc_tools.protoc -I. --mypy_out=. --grpc_python_out=. ./helloworld.proto     # Grpcio (helloworld_pb2_grpc.py)
-	poetry run python -m grpc_tools.protoc -I. --mypy_out=. --grpclib_python_out=. ./helloworld.proto  # Grpclib (helloworld_grpc.py)
-
+.PHONY: protoc
+protoc: certs
+	poetry run python -m grpc_tools.protoc -I. --mypy_out=. --python_out=. ./tests/proto/helloworld.proto          # Protobuf messages (helloworld_pb2.py)
+	poetry run python -m grpc_tools.protoc -I. --mypy_out=. --grpc_python_out=. ./tests/proto/helloworld.proto     # Grpcio (helloworld_pb2_grpc.py)
 
 certs:
 	mkdir -p certs
@@ -18,14 +16,14 @@ certs:
 
 
 .PHONY: qa
-qa:
+qa: protoc
 	poetry run ruff check .
 	poetry run ruff format --check
 	poetry run mypy --warn-unused-ignores .
 
 
 .PHONY: test
-test:
+test: protoc
 	poetry run pytest --cov=grpc_boilerplate tests/
 
 
