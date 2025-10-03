@@ -5,14 +5,10 @@ Code for help server and client usage
   - Client unsecure connections
   - Client secure connections
   - Client token auth
-  - Server insecure
-  - Server secure
 * grpcio.aio `grpc_boilerplate.grpcio_aio_tools`
   - Client unsecure connections
   - Client secure connections
   - Client token auth
-  - Server insecure
-  - Server secure
 
 ## Examples
 Examples proto: [helloworld.proto](helloworld.proto).
